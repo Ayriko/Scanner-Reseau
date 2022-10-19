@@ -9,3 +9,5 @@ on peut commencer à filtrer ici les dispositifs et proposer à l'utilisateur su
 pour les ports on peut se concentrer d'abord sur les 1024 premiers
 puis ensuite sur des services/ports précis (trouver les services connus et leurs ports)
 voir port 80 et 443 si hébergement web
+
+ajouter un requirement.txt avec pip install -r
