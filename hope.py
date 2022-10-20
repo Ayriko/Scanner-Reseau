@@ -3,7 +3,7 @@ import re
 from scapy.all import ARP, Ether, srp
 
 def main():
-    if sys.argv[:1] == [] :
+    if sys.argv[1:] == [] :
         ipChoose = input("Rentrez votre addresse IP avec son masque (ex: xxx.xxx.xxx.xxx/xx)\n")
         if valableIp(ipChoose):
             scanARP(ipChoose)
