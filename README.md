@@ -11,3 +11,5 @@ puis ensuite sur des services/ports précis (trouver les services connus et leur
 voir port 80 et 443 si hébergement web
 
 ajouter un requirement.txt avec pip install -r
+
+verbose = False) -> pas de print dans le terminal genre du ping
