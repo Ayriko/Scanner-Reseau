@@ -11,9 +11,9 @@ def main():
         for i in range(1, len(sys.argv)):
             if valableIp(sys.argv[i]):
                 tabIp = scanARP(sys.argv[i])
-                inputUser = input("Voulez vous ping les differents ip ?[Y/N]")
-                if inputUser.toLower() == "y":
-                    scanIP(tabIp)
+        inputUser = input("Voulez vous ping les differents IP ?[Y/N]").lower()
+        if inputUser == "y":
+            scanIP(tabIp)
     
     print(tabIp)
     print(sys.argv[1:])
@@ -37,15 +37,29 @@ def scanARP(ipTest):
         tabMac.append(testARP[i][1].hwsrc)
         with open("rapport.txt", "a") as file:
             file.write("ip : " + tabIp[i] + " mac : " + tabMac[i] + '\n')
-    with open("rapport.txt", "a") as file:
-        file.write("------------------------------------------------------------------------------" +  '\n')
     print("Le scan est terminé \n")
     return tabIp
 
 def scanIP(tabIp):
+    tabICMP = []
+    linux = []
+    win = []
     for i in range(0, len(tabIp)):
         ansIP = sr(IP(dst=tabIp[i])/ICMP(), timeout=1, verbose=False)[0]
-        ansIP.summary(lambda s, r: r.sprintf("%IP.src% is alive"))
-        print(IP.src)
+        for i in range(0, len(ansIP)):
+            tabICMP.append(ansIP[i][1].src)
+    
+    for i in tabIp:
+        if i in tabICMP:
+            linux.append(i)
+        else:
+            win.append(i)
+    
+    with open("rapport.txt", "a") as file:
+        file.write("ces IP appartiennent surement à un linux ou a un macOs : " + linux + '\n')
+        file.write("ces IP appartiennent surement à un windows : " + win + '\n')
+        file.write("------------------------------------------------------------------------------" +  '\n')
+    print(tabICMP)
+#    return tabICMP
 
 main()
