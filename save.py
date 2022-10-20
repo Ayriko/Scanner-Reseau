@@ -42,3 +42,9 @@ for ip in StockIP:  # ping for each ip in the file
 
 # si on propose une liste d'interface au lancement, aussi ajouter genre un -i pour préciser directement l'ip qu'on souhaite tester
 # 1 ping pas suffisant, temps d'attente arp
+
+
+#testARP, unansARP = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst="10.3.1.11/24"), timeout=2)
+ #   testARP.summary(lambda s,r: r.sprintf("%Ether.src% %ARP.psrc%") )
+  #  testPing, unansPING = srp(IP(dst="10.3.1.12")/ICMP(), timeout=3)
+   # testPing.summary(lambda s,r: r.sprintf("%IP.src% is alive") )
