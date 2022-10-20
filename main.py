@@ -11,6 +11,12 @@ def scanARP():
         "^(((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(((\/([4-9]|[12][0-9]|3[0-2]))?)|\s?-\s?((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))))(,\s?|$))+", ip)
     if regex:
         print("Scanning...")
+        #arp_req_frame = ARP(pdst = ip)
+        # broadcast_ether_frame = Ether(dst = "ff:ff:ff:ff:ff:ff") -> création d'une frame ethernet  + on va réaliser la requete arp vers la broadcast pour demander à chaque machine
+        #broadcast_ether_arp_req_frame = broadcast_ether_frame / arp_req_frame
+        # answered_list = srp(broadcast_ether_arp_req_frame, timeout = 1, verbose = False)[0]  -> verbose permet de ne pas voir la commande dans la console
+        # le [0] permet de stocker que les replys et non les requêtes sans réponses qui ne sont pas utile ici
+        # tout ce qu'il y a au dessus peut etre réduit en :
         testARP = srp(Ether(dst="ff:ff:ff:ff:ff:ff") /
                       ARP(pdst=ip), timeout=2, verbose=False)[0]
         result = []
@@ -37,3 +43,7 @@ def scanIP(tabIp):
 
 scanned_output = scanARP()
 scanIP(scanned_output)
+
+
+# si on propose une liste d'interface au lancement, aussi ajouter genre un -i pour préciser directement l'ip qu'on souhaite tester
+# 1 ping pas suffisant, temps d'attente arp
