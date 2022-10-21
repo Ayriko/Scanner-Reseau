@@ -23,7 +23,7 @@ def main():
         if found_args["-h"]:
             print("oe de l'aide")
             return
-        if found_args["ip"]:
+        if found_args["-i"]:
             tabIp = scanARP(ip)
         # for i in range(1, len(sys.argv)):
         #     if valableIp(sys.argv[i]):
@@ -31,7 +31,6 @@ def main():
         if found_args["-p"]:
             print ("le port oe")
             print(port)
-            return
         else:
             sys.argv[1:] = []
             main()
@@ -75,7 +74,7 @@ def valableIp(testIp):
 def scanARP(ipTest):
     tabIp = []
     tabMac = []
-    testARP = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=ipTest), timeout=2, verbose=False)[0]
+    testARP = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=ipTest), timeout=2)[0]
     for i in range(0, len(testARP)):
         tabIp.append(testARP[i][1].psrc)
         tabMac.append(testARP[i][1].hwsrc)
@@ -102,8 +101,8 @@ def scanIP(tabIp):
             win.append(i)
     
     with open("rapport.txt", "a") as file:
-        file.write("ces IP appartiennent surement à un linux ou a un macOs : " + linux + '\n')
-        file.write("ces IP appartiennent surement à un windows : " + win + '\n')
+        file.write("Ces IP appartiennent surement à un linux ou a un macOs : " + str(linux) + '\n')
+        file.write("Ces IP appartiennent surement à un windows : " + str(win) + '\n')
         file.write("------------------------------------------------------------------------------" +  '\n')
 #    print(tabICMP)
 #    return tabICMP
@@ -114,7 +113,7 @@ def helpMe(param):
     return False
 
 def validPort(param):
-    regex = re.search("^(([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$", param)
+    regex = re.search("^([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$", str(param))
     if regex:
         return True
     else:
@@ -134,14 +133,14 @@ def flag(param):
     ip = ""
     port = ""
     found_args = {
-        "-p": False,
+        "-i": False,
         "-h": False,
         "-p": False
     }
     for i in range(1, len(param)):
         if wantIp(param[i]):
             if valableIp(param[i+1]):
-                found_args["-p"] = True
+                found_args["-i"] = True
                 ip = param[i+1]
             else:
                 sys.argv[1:] = []
@@ -152,7 +151,7 @@ def flag(param):
         elif wantPort(param[i]):
             if validPort(param[i+1]):
                 found_args["-p"] = True
-                port = param[i+1]
+                port = str(param[i+1])
     
     return found_args, ip, port
 
