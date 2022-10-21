@@ -19,7 +19,6 @@ def scanARP():
         # tout ce qu'il y a au dessus peut etre réduit en :
         testARP = srp(Ether(dst="ff:ff:ff:ff:ff:ff") /
                       ARP(pdst=ip), timeout=2, verbose=False)[0]
-        result = []
         for i in range(0, len(testARP)):
             tabIp.append(testARP[i][1].psrc)
             tabMac.append(testARP[i][1].hwsrc)
