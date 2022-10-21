@@ -32,18 +32,29 @@ def scanARP():
 
 def scanIP(tabIp):
     for i in range(0, len(tabIp)):
-        ansIP = sr(IP(dst=tabIp[i])/ICMP(), timeout=1, verbose=False)[0]
+        ansIP, unansIP = sr(IP(dst=tabIp[i])/ICMP(), timeout=1, verbose=False)
         ansIP.summary(lambda s, r: r.sprintf("%IP.src% is alive"))
+        unansIP.summary(lambda s, r: r.sprintf("%IP.src% is dead")) #indice potentiel windows
 
 # def display_result(result):
 #    print("-----------------------------------\nIP Address\tMAC Address\n-----------------------------------")
 #    for i in result:
 #       print("{}\t{}".format(i["ip"], i["mac"]))
 
+#partie test de l'os lors du scan
+# list des signatures testables/identifiables :
+#ISN, p0f et nmap_fp
+
+#pour linux, possible après un three-way-handshake -> envoyer une trame sans flags TCP et avec un payload
+# si ACK en retour -> Linux
+# sinon non-linux 
+# -> ALORS, peut etre premier test pour bien séparer, ensuite revoir avec les IPs les non-linux, peut faire hypothèse entre mac et windows ducoup
+# TROUVER signature mac
+
 
 scanned_output = scanARP()
 scanIP(scanned_output)
 
 
-# si on propose une liste d'interface au lancement, aussi ajouter genre un -i pour préciser directement l'ip qu'on souhaite tester
+# jouter genre un -i pour préciser directement l'ip qu'on souhaite tester sans passer par l'interaction
 # 1 ping pas suffisant, temps d'attente arp
