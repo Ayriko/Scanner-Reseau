@@ -3,19 +3,61 @@ import re
 from scapy.all import ARP, Ether, srp, sr, IP, ICMP
 
 def main():
+    ip = ""
+    port = ""
+    found_args = {
+        
+    } 
     if sys.argv[1:] == [] :
         ipChoose = input("Rentrez votre addresse IP avec son masque (ex: xxx.xxx.xxx.xxx/xx)\n")
         if valableIp(ipChoose):
             tabIp = scanARP(ipChoose)
-        inputUser = input("Voulez vous ping les differents IP ?[Y/N] ").lower()
+        else:
+            main()
+        inputUser = input("Voulez vous ping les differents IP ? [Y/N] ").lower()
         if inputUser == "y" or inputUser == "yes":
             scanIP(tabIp)
         
-    else:    
-        for i in range(1, len(sys.argv)):
-            if valableIp(sys.argv[i]):
-                tabIp = scanARP(sys.argv[i])
-        inputUser = input("Voulez vous ping les differents IP ?[Y/N] ").lower()
+    else:
+        found_args, ip, port = flag(sys.argv)
+        if found_args["-h"]:
+            print("oe de l'aide")
+            return
+        if found_args["ip"]:
+            tabIp = scanARP(ip)
+        # for i in range(1, len(sys.argv)):
+        #     if valableIp(sys.argv[i]):
+        #         tabIp = scanARP(sys.argv[i])
+        if found_args["-p"]:
+            print ("le port oe")
+            print(port)
+            return
+        else:
+            sys.argv[1:] = []
+            main()
+            return
+        # found_args = {
+        # "ip": False,
+        # "-h": False,
+        # "port": False
+        # } 
+        # for i in range(1, len(sys.argv)):
+        #     if wantIp(sys.argv[i]):
+        #         if valableIp(sys.argv[i+1]):
+        #             found_args["ip"] = True
+        #             tabIp.append(sys.argv[i+1])
+        #     elif helpMe(sys.argv[i]):
+        #         found_args["-h"] = True
+        #     elif wantPort(sys.argv[i]):
+        #         if validPort(sys.argv[i+1]):
+        #             found_args["port"] = True
+        #             tabPort.append(sys.argv[i+1])
+            
+        #     else:
+        #         sys.argv[1:] = []
+        #         main()
+        #         return
+        inputUser = input("Voulez vous ping les differents IP ? [Y/N] ").lower()
         if inputUser == "y" or inputUser == "yes":
             scanIP(tabIp)
     
@@ -65,5 +107,53 @@ def scanIP(tabIp):
         file.write("------------------------------------------------------------------------------" +  '\n')
 #    print(tabICMP)
 #    return tabICMP
+
+def helpMe(param):
+    if param == "-h":
+        return True
+    return False
+
+def validPort(param):
+    regex = re.search("^(([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$", param)
+    if regex:
+        return True
+    else:
+        print("le port n'est pas valide")
+
+def wantIp(param):
+    if param == "-i":
+        return True
+    return False
+
+def wantPort(param):
+    if param == "-p":
+        return True
+    return False
+
+def flag(param):
+    ip = ""
+    port = ""
+    found_args = {
+        "-p": False,
+        "-h": False,
+        "-p": False
+    }
+    for i in range(1, len(param)):
+        if wantIp(param[i]):
+            if valableIp(param[i+1]):
+                found_args["-p"] = True
+                ip = param[i+1]
+            else:
+                sys.argv[1:] = []
+                main()
+                return
+        elif helpMe(param[i]):
+            found_args["-h"] = True
+        elif wantPort(param[i]):
+            if validPort(param[i+1]):
+                found_args["-p"] = True
+                port = param[i+1]
+    
+    return found_args, ip, port
 
 main()
