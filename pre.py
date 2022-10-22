@@ -4,6 +4,7 @@ from scapy.all import ARP, TCP, Ether, srp, sr, IP, ICMP, sr1
 import random
 import socket
 
+
 def main():
     ip = ""
     port = []
@@ -11,27 +12,28 @@ def main():
     found_args = {
 
     }
-    #idée de rajouter un -y ou -n pour dire qu'on accepte ou non tout les tests suivants (genre ping)
-    if sys.argv[1:] == [] :
-        ipChoose = input("Rentrez l'adresse IP à tester avec son masque (ex: xxx.xxx.xxx.xxx/xx)\n")
+    # idée de rajouter un -y ou -n pour dire qu'on accepte ou non tout les tests suivants (genre ping)
+    if sys.argv[1:] == []:
+        ipChoose = input(
+            "Rentrez l'adresse IP à tester avec son masque (ex: xxx.xxx.xxx.xxx/xx)\n")
         if valableIp(ipChoose):
             tabIp = scanARP(ipChoose)
         else:
             main()
-        inputUser = input("Voulez vous ping les differents IP ? [Y/N] ").lower()
-        #remplacer par "Analyser les ips plus en profondeur ou un truc du genre ?"
+        inputUser = input(
+            "Voulez vous ping les differents IP ? [Y/N] ").lower()
+        # remplacer par "Analyser les ips plus en profondeur ou un truc du genre ?"
         if inputUser == "y" or inputUser == "yes":
             scanIP(tabIp)
 
-
-            #rajouter l'interaction port
+            # rajouter l'interaction port
 
     else:
         found_args, ip, port, verifRange = flag(sys.argv)
         if found_args["-h"]:
             print("oe de l'aide")
             return
-        if found_args["-i"]: #soucis avec -i -> donner erreur si pas d'ip après
+        if found_args["-i"]:  # soucis avec -i -> donner erreur si pas d'ip après
             tabIp = scanARP(ip)
         # for i in range(1, len(sys.argv)):
         #     if valableIp(sys.argv[i]):
@@ -44,8 +46,10 @@ def main():
             else:
                 print("eh beh")
 
+
 def valableIp(testIp):
-    regex = re.search("^([01]?\d\d?|2[0-4]\d|25[0-5])(?:\.[01]?\d\d?|\.2[0-4]\d|\.25[0-5]){3}(?:/[1-2]?\d|/3[0-2])$", testIp)
+    regex = re.search(
+        "^([01]?\d\d?|2[0-4]\d|25[0-5])(?:\.[01]?\d\d?|\.2[0-4]\d|\.25[0-5]){3}(?:/[1-2]?\d|/3[0-2])$", testIp)
     if regex:
         return True
 
@@ -56,7 +60,8 @@ def scanARP(ipTest):
     tabIp = []
     tabMac = []
     count = 0
-    testARP = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=ipTest), timeout=2)[0]
+    testARP = srp(Ether(dst="ff:ff:ff:ff:ff:ff") /
+                  ARP(pdst=ipTest), timeout=2)[0]
     with open("rapport.txt", "a") as file:
         file.write("Nouvelle entrée dans le rapport" + "\n")
     for i in range(0, len(testARP)):
@@ -66,11 +71,13 @@ def scanARP(ipTest):
         with open("rapport.txt", "a") as file:
             file.write("ip : " + tabIp[i] + " mac : " + tabMac[i] + '\n')
     with open("rapport.txt", "a") as file:
-        file.write("------------------------------------------------------------------------------" +  '\n')
-    print("Le scan est terminé, hôtes détectés dans le réseau : " + str(count) +  "\n")
+        file.write(
+            "------------------------------------------------------------------------------" + '\n')
+    print("Le scan est terminé, hôtes détectés dans le réseau : " + str(count) + "\n")
     return tabIp
 
-def scanIP(tabIp): #rajouter les test os ici ?
+
+def scanIP(tabIp):  # rajouter les test os ici ?
     tabICMP = []
     linux = []
     win = []
@@ -87,127 +94,148 @@ def scanIP(tabIp): #rajouter les test os ici ?
 
     print("Envoi de pings aux différentes IPs terminé, résultat entré dans le rapport")
     with open("rapport.txt", "a") as file:
-        file.write("Ces IPs appartiennent surement à un linux ou a un macOs : " + str(linux) + '\n')
-        file.write("Ces IPs appartiennent potentiellement à un windows (ICMP bloqués) : " + str(win) + '\n')
-        file.write("------------------------------------------------------------------------------" +  '\n')
+        file.write(
+            "Ces IPs appartiennent surement à un linux ou a un macOs : " + str(linux) + '\n')
+        file.write(
+            "Ces IPs appartiennent potentiellement à un windows (ICMP bloqués) : " + str(win) + '\n')
+        file.write(
+            "------------------------------------------------------------------------------" + '\n')
 #    print(tabICMP)
 #    return tabICMP
 
+
 def scanPort(tabIp, port):
-    #Envoi d'une requête Syn depuis un port random vers les ports dst
+    # Envoi d'une requête Syn depuis un port random vers les ports dst
     for dst_port in port:
         print("Scan Syn pour le port " + dst_port + " sur les IPs du réseau")
-        src_port = random.randint(1025,65534)
+        src_port = random.randint(1025, 65534)
         dst_port = int(dst_port)
         for ip in tabIp:
             resp = sr1(
-                IP(dst=ip)/TCP(sport=src_port, dport=dst_port,flags="S"),timeout=1,
+                IP(dst=ip)/TCP(sport=src_port, dport=dst_port, flags="S"), timeout=1,
                 verbose=0,
-                )
+            )
 
             if resp is None:
                 print(f"{ip}:{dst_port} est filtré")
                 with open("rapport.txt", "a") as file:
-                    file.write(ip + ":" + str(dst_port) + " est filtré (pas de réponse). \n")
+                    file.write(ip + ":" + str(dst_port) +
+                               " est filtré (pas de réponse). \n")
 
             elif(resp.haslayer(TCP)):
-                if(resp.getlayer(TCP).flags == 0x12): #SA
+                if(resp.getlayer(TCP).flags == 0x12):  # SA
                     # Envoie d'un RST pour fermer la connexion
                     send_rst = sr(
-                        IP(dst=ip)/TCP(sport=src_port, dport=dst_port,flags='R'),
+                        IP(dst=ip)/TCP(sport=src_port,
+                                       dport=dst_port, flags='R'),
                         timeout=1,
                         verbose=0,
-                        )
+                    )
                     print(f"{ip}:{dst_port} est ouvert.")
-                    #print(f"{resp.getlayer(TCP).flags}") repond SA
+                    # print(f"{resp.getlayer(TCP).flags}") repond SA
                     service = socket.getservbyport(dst_port)
                     with open("rapport.txt", "a") as file:
-                        file.write(ip + ":" + str(dst_port) + " est ouvert. Service : " + service + "\n")
-                elif (resp.getlayer(TCP).flags == 0x14): #RST (ou RA)
+                        file.write(ip + ":" + str(dst_port) +
+                                   " est ouvert. Service : " + service + "\n")
+                elif (resp.getlayer(TCP).flags == 0x14):  # RST (ou RA)
                     print(f"{ip}:{dst_port} est fermé.")
                     service = socket.getservbyport(dst_port)
-                    #print(f"{resp.getlayer(TCP).flags}") repond RA
+                    # print(f"{resp.getlayer(TCP).flags}") repond RA
                     with open("rapport.txt", "a") as file:
-                        file.write(ip + ":" + str(dst_port) + " est fermé. Service : " + service + " \n")
+                        file.write(ip + ":" + str(dst_port) +
+                                   " est fermé. Service : " + service + " \n")
 
             elif(resp.haslayer(ICMP)):
                 if(
-                        int(resp.getlayer(ICMP).type) == 3 and
-                        int(resp.getlayer(ICMP).code) in [1,2,3,9,10,13]
-                   ):
-                        print(f"{ip}:{dst_port} est filtré.")
-                        with open("rapport.txt", "a") as file:
-                            file.write(ip + ":" + str(dst_port) + " est filtré (retour ICMP type 3). \n")
+                    int(resp.getlayer(ICMP).type) == 3 and
+                    int(resp.getlayer(ICMP).code) in [1, 2, 3, 9, 10, 13]
+                ):
+                    print(f"{ip}:{dst_port} est filtré.")
+                    with open("rapport.txt", "a") as file:
+                        file.write(ip + ":" + str(dst_port) +
+                                   " est filtré (retour ICMP type 3). \n")
 
-def scanPortRange(tabIp, port): #scan d'un port à un autre
-    #Envoi d'une requête Syn depuis un port random vers les ports dst
-    print("Scan Syn du port " + port[1] + " à " + port[2] + " sur les IPs du réseau")
-    src_port = random.randint(1025,65534)
-    port1 = int(dst_port[1])
-    port2 = int(des_port[2])
+
+def scanPortRange(tabIp, port):  # scan d'un port à un autre
+    # Envoi d'une requête Syn depuis un port random vers les ports dst
+    print("Scan Syn du port " + port[0] +
+          " à " + port[1] + " sur les IPs du réseau")
+    src_port = random.randint(1025, 65534)
+    port1 = int(port[0])
+    port2 = int(port[1])
     while port1 < port2:
         for ip in tabIp:
             resp = sr1(
-                IP(dst=ip)/TCP(sport=src_port, dport=(port1),flags="S"),timeout=1,
+                IP(dst=ip)/TCP(sport=src_port, dport=(port1), flags="S"), timeout=1,
                 verbose=0,
-                )
+            )
 
             if resp is None:
                 print(f"{ip}:{port1} est filtré")
                 with open("rapport.txt", "a") as file:
-                    file.write(ip + ":" + str(port1) + " est filtré (pas de réponse). \n")
+                    file.write(ip + ":" + str(port1) +
+                               " est filtré (pas de réponse). \n")
 
             elif(resp.haslayer(TCP)):
-                if(resp.getlayer(TCP).flags == 0x12): #SA
+                if(resp.getlayer(TCP).flags == 0x12):  # SA
                     # Envoie d'un RST pour fermer la connexion
                     send_rst = sr(
-                        IP(dst=ip)/TCP(sport=src_port, dport=port1,flags='R'),
+                        IP(dst=ip)/TCP(sport=src_port, dport=port1, flags='R'),
                         timeout=1,
                         verbose=0,
-                        )
+                    )
                     print(f"{ip}:{port1} est ouvert.")
-                    #print(f"{resp.getlayer(TCP).flags}") repond SA
+                    # print(f"{resp.getlayer(TCP).flags}") repond SA
                     service = socket.getservbyport(port1)
                     with open("rapport.txt", "a") as file:
-                        file.write(ip + ":" + str(port1) + " est ouvert. Service : " + service + "\n")
-                elif (resp.getlayer(TCP).flags == 0x14): #RST (ou RA)
+                        file.write(ip + ":" + str(port1) +
+                                   " est ouvert. Service : " + service + "\n")
+                elif (resp.getlayer(TCP).flags == 0x14):  # RST (ou RA)
                     print(f"{ip}:{port1} est fermé.")
                     service = socket.getservbyport(port1)
-                    #print(f"{resp.getlayer(TCP).flags}") repond RA
+                    # print(f"{resp.getlayer(TCP).flags}") repond RA
                     with open("rapport.txt", "a") as file:
-                        file.write(ip + ":" + str(port1) + " est fermé. Service : " + service + " \n")
+                        file.write(ip + ":" + str(port1) +
+                                   " est fermé. Service : " + service + " \n")
 
             elif(resp.haslayer(ICMP)):
                 if(
-                        int(resp.getlayer(ICMP).type) == 3 and
-                        int(resp.getlayer(ICMP).code) in [1,2,3,9,10,13]
-                    ):
-                        print(f"{ip}:{port1} est filtré.")
-                        with open("rapport.txt", "a") as file:
-                            file.write(ip + ":" + str(port1) + " est filtré (retour ICMP type 3). \n")
-            port1 = port1 + 1
+                    int(resp.getlayer(ICMP).type) == 3 and
+                    int(resp.getlayer(ICMP).code) in [1, 2, 3, 9, 10, 13]
+                ):
+                    print(f"{ip}:{port1} est filtré.")
+                    with open("rapport.txt", "a") as file:
+                        file.write(ip + ":" + str(port1) +
+                                   " est filtré (retour ICMP type 3). \n")
+        port1 = port1 + 1
+
 
 def helpMe(param):
     if param == "-h":
         return True
     return False
 
+
 def validPort(param):
-    regex = re.search("^([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$", str(param))
+    regex = re.search(
+        "^([1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$", str(param))
     if regex:
         return True
     else:
         print("le port n'est pas valide")
+
 
 def wantIp(param):
     if param == "-i":
         return True
     return False
 
+
 def wantPort(param):
     if param == "-p":
         return True
     return False
+
 
 def flag(param):
     ip = ""
@@ -236,7 +264,7 @@ def flag(param):
                             elif char == "-":
                                 split = "-"
                                 verifRange = True
-                        #peut tester '-' ou ',' si mec veut tester une range de port
+                        # peut tester '-' ou ',' si mec veut tester une range de port
                         port = (str(param[i+3])).split(split)
                         for x in port:
                             if validPort(x):
@@ -256,5 +284,6 @@ def flag(param):
         elif wantPort(param[i]) and found_args["-i"] == False:
             print("Il faut préciser une ip avec -i avant pour utiliser -p")
             exit()
+
 
 main()
