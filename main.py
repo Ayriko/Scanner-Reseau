@@ -35,6 +35,10 @@ def scanIP(tabIp):
         ansIP.summary(lambda s, r: r.sprintf("%IP.src% is alive"))
         unansIP.summary(lambda s, r: r.sprintf("%IP.src% is dead")) #indice potentiel windows
 
+def scanPort():
+    ans, unans = sr(IP(dst="10.3.1.12")/TCP(dport=(20,24),flags="S"))
+    ans.summary( lambda sr: sr[1].sprintf("%TCP.sport% \t %TCP.flags%") )
+
 # def display_result(result):
 #    print("-----------------------------------\nIP Address\tMAC Address\n-----------------------------------")
 #    for i in result:

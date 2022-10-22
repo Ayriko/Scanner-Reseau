@@ -14,7 +14,7 @@ def main():
             tabIp = scanARP(ipChoose)
         else:
             main()
-        inputUser = input("Voulez vous ping les differents IP ? [Y/N] ").lower()
+        inputUser = input("Voulez vous ping les différentes IPsg ? [Y/N] ").lower()
         if inputUser == "y" or inputUser == "yes":
             scanIP(tabIp)
         
@@ -97,7 +97,7 @@ def scanIP(tabIp):
     for i in tabIp:
         if i in tabICMP:
             linux.append(i)
-        else:
+        else: 
             win.append(i)
     
     with open("rapport.txt", "a") as file:
