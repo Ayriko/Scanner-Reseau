@@ -75,7 +75,6 @@ def scanOS(tabIp):
     linux = []
     win = []
     macOs = []
-    verifMac = False
     print("Scan en cours...")
     for i in range(0, len(tabIp)):
         ansIP = sr(IP(dst=tabIp[i])/ICMP(), timeout=2)[0]
@@ -256,7 +255,6 @@ def wantPort(param):
 def flag(param):
     ip = ""
     port = []
-    ports = ""
     split = ""
     verifRange = False
     found_args = {
