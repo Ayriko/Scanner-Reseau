@@ -1,6 +1,6 @@
 import sys
 import re
-from scapy.all import ARP, Ether, srp, sr, IP, ICMP
+from scapy.all import ARP, Ether, srp, sr, IP, ICMP, TCP
 
 def main():
     ip = ""
@@ -14,9 +14,14 @@ def main():
             tabIp = scanARP(ipChoose)
         else:
             main()
+
         inputUser = input("Voulez vous ping les differents IP ? [Y/N] ").lower()
         if inputUser == "y" or inputUser == "yes":
             scanIP(tabIp)
+
+        inputUser = input("Selectionnez un port que vous voulez scanner ? ex:xx,x,xxx ").lower()
+        if validPort(inputUser):
+            scanPort(inputUser)
         
     else:
         found_args, ip, port = flag(sys.argv)
@@ -107,8 +112,12 @@ def scanIP(tabIp):
 #    print(tabICMP)
 #    return tabICMP
 
+def scanPort(tabIp, port):
+    ans, unans = sr(IP(dst=tabIp)/TCP(dport=port,flags="S"))
+    ans.make_table(lambda s,r: (s.dst, s.dport,r.sprintf("{TCP:%TCP.flags%}{ICMP:%ICMP.type%}")))
+
 def helpMe(param):
-    if param == "-h":
+    if param == "-h" or param == "--help":
         return True
     return False
 
@@ -131,7 +140,7 @@ def wantPort(param):
 
 def flag(param):
     ip = ""
-    port = ""
+    port = []
     found_args = {
         "-i": False,
         "-h": False,
@@ -151,7 +160,7 @@ def flag(param):
         elif wantPort(param[i]):
             if validPort(param[i+1]):
                 found_args["-p"] = True
-                port = str(param[i+1])
+                port.append(param[i+1])
     
     return found_args, ip, port
 
