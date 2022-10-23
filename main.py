@@ -29,7 +29,7 @@ def main():
     else:
         found_args, ip, port, verifRange = flag(sys.argv)
         if found_args["-h"]:
-            print("-h, --help\n                 show command help\n-i [ip]\n                 choose a ip for scanning\n-p [port] [port,port...] [port-port]\n                 choose an ip or multiple port to scan")
+            print("-h, --help\n                 show command help\n-i [ip]\n                 choose a ip for scanning, ip should have these form : xxx.xxx.xxx.xxx/xx\n-p [port] [port,port...] [port-port]\n                 choose a port or multiple ports to scan\n                 a ',' between ports means to scan each listed ports\n                 a '-' between ports means to scan each ports between listed ports")
             return
         if found_args["-i"]:  
             tabIp = scanARP(ip)
