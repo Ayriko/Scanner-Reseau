@@ -3,11 +3,12 @@ Le projet Scanner-Réseau est un projet où nous devons scanner un réseau pour 
 Notre outil est utilisable de deux façons différents :  
 - d'une manière interactive et progressive via différents lignes de commandes,
 - d'une manière directe en précisant divers arguments dès la commande de lancement.  
+
 Dans tout les cas, l'utilisateur va pouvoir récupérer toutes les IPs actives du réseau ainsi que les adresses Mac des machines détectées.  
-A partir de ces IPs, il est aussi possible d'obtenir des informations sur les potentiels OS derrières ces IPs et aussi de tester divers ports par défaut.  
+A partir de ces IPs, il est aussi possible d'obtenir des informations sur les potentiels OS derrières ces IPs et aussi de tester divers ports par défaut.
 Afin de savoir s'ils sont ouverts ou non et quelles services sont présents derrières.  
-La méthode directe de notre outil est plus libre quant au scan de port, permettant de tester le ou les ports souhaités.  
-(voir (help dans la partie : Utilisation)
+La méthode directe de notre outil est plus libre quand au scan de port, permettant de tester le ou les ports souhaités.  
+(voir -help dans la partie : Utilisation)
 
 ## Installation 
 Ouvrez un terminal  
