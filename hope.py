@@ -19,19 +19,13 @@ def main():
             tabIp = scanARP(ipChoose)
         else:
             main()
-        inputUser = input("Voulez vous faire un scan plus en profonder ? [Y/N] ").lower()
+        inputUser = input("Voulez vous faire un scan plus en profondeur ? [Y/N] ").lower()
         if inputUser == "y" or inputUser == "yes":
             tabPort = ["20", "22", "53", "80", "443"]
             scanIP(tabIp)
             scanPort(tabIp, tabPort)
         else:
             return
-
-        # # remplacer par "Analyser les ips plus en profondeur ou un truc du genre ?"
-        # if inputUser == "y" or inputUser == "yes":
-        #     scanIP(tabIp)
-
-        #     # rajouter l'interaction port
 
     else:
         found_args, ip, port, verifRange = flag(sys.argv)
@@ -215,7 +209,7 @@ def scanPortRange(tabIp, port):  # scan d'un port à un autre
 
 
 def helpMe(param):
-    if param == "-h":
+    if param == "-h" or param == "--help":
         return True
     return False
 
@@ -226,7 +220,7 @@ def validPort(param):
     if regex:
         return True
     else:
-        print("le port n'est pas valide")
+        print("Le port n'est pas valide")
 
 
 def wantIp(param):
