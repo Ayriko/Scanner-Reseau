@@ -22,7 +22,7 @@ def main():
         inputUser = input("Voulez vous faire un scan plus en profondeur ? [Y/N] ").lower()
         if inputUser == "y" or inputUser == "yes":
             tabPort = ["20", "22", "53", "80", "443"]
-            scanIP(tabIp)
+            scanOS(tabIp)
             scanPort(tabIp, tabPort)
         else:
             return
@@ -34,7 +34,7 @@ def main():
             return
         if found_args["-i"]:  # soucis avec -i -> donner erreur si pas d'ip après
             tabIp = scanARP(ip)
-            scanIP(tabIp)
+            scanOS(tabIp)
         # for i in range(1, len(sys.argv)):
         #     if valableIp(sys.argv[i]):
         #         tabIp = scanARP(sys.argv[i])
@@ -74,32 +74,47 @@ def scanARP(ipTest):
     print("Le scan est terminé, hôtes détectés dans le réseau : " + str(count) + "\n")
     return tabIp
 
-
-def scanIP(tabIp):  # rajouter les test os ici ?
+def scanOS(tabIp):
     tabICMP = []
     linux = []
     win = []
-    print("Envoi en cours...")
+    macOs = []
+    verifMac = False
+    print("Scan en cours...")
     for i in range(0, len(tabIp)):
         ansIP = sr(IP(dst=tabIp[i])/ICMP(), timeout=2)[0]
         for i in range(0, len(ansIP)):
             tabICMP.append(ansIP[i][1].src)
     for i in tabIp:
         if i in tabICMP:
-            linux.append(i)
+            resp = sr1(
+                IP(dst=i)/TCP(dport=1900, flags="S"), timeout=1, #test port bonjour macOs
+                verbose=0,
+            )
+            if resp.haslayer(TCP):
+                if(resp.getlayer(TCP).flags == 0x12 or resp.getlayer(TCP).flags == 0x14):  # 
+                    if resp.getlayer(TCP).flags == 0x12 :
+                        send_rst = sr(
+                        IP(dst=ip)/TCP(dport=1900, flags='R'),
+                                timeout=1,
+                                verbose=0,
+                            )
+                    macOs.append(i)
+                else:
+                    linux.append(i)
         else:
             win.append(i)
 
-    print("Envoi de pings aux différentes IPs terminé, résultat entré dans le rapport")
+    print("Envoi des différents tests terminé, résultat entré dans le rapport")
     with open("rapport.txt", "a") as file:
-        file.write(
-            "Ces IPs appartiennent potentiellement à un linux ou a un macOs : " + str(linux) + '\n')
         file.write(
             "Ces IPs appartiennent potentiellement à un windows (ICMP bloqués) : " + str(win) + '\n')
         file.write(
+            "Ces IPs semblent appartenir à un macOs (Service Bonjour (1900) détecté): " + str(macOs) + '\n')
+        file.write(
+            "Ces IPs appartiennent surement à un linux : " + str(linux) + '\n')
+        file.write(
             "------------------------------------------------------------------------------" + '\n')
-#    print(tabICMP)
-#    return tabICMP
 
 
 def scanPort(tabIp, port):
@@ -161,7 +176,7 @@ def scanPortRange(tabIp, port):  # scan d'un port à un autre
     src_port = random.randint(1025, 65534)
     port1 = int(port[0])
     port2 = int(port[1])
-    while port1 < port2:
+    while port1 <= port2:
         for ip in tabIp:
             resp = sr1(
                 IP(dst=ip)/TCP(sport=src_port, dport=(port1), flags="S"), timeout=1,
@@ -258,8 +273,15 @@ def flag(param):
             else:
                 print("Merci de renseigner une Ip après le -i")
                 exit()
+        elif wantPort(param[i]) and found_args["-i"] == False:
+            print("Il faut préciser une ip avec -i avant pour utiliser -p")
+            exit()
         elif wantPort(param[i]):
-            port = [param[i+1]]
+            if len(param) > 4:
+                port = [param[i+1]]
+            else:
+                print("Il faut préciser un port après le -p")
+                exit()
             for char in param[i+1]:
                 if char.isnumeric() == False:
                     if char == ",":
@@ -267,6 +289,9 @@ def flag(param):
                     elif char == "-":
                         split = "-"
                         verifRange = True
+                    else:
+                        print("Vérifier le port fourni après le -p, voir -h pour la forme")
+                        exit()
                         # peut tester '-' ou ',' si mec veut tester une range de port
                     port = (str(param[i+1])).split(split)
                     break
@@ -275,9 +300,6 @@ def flag(param):
                     found_args["-p"] = True
                 else:
                     exit()
-        elif wantPort(param[i]) and found_args["-i"] == False:
-            print("Il faut préciser une ip avec -i avant pour utiliser -p")
-            exit()
     return found_args, ip, port, verifRange
 
 
