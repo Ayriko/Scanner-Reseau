@@ -40,6 +40,7 @@ def main():
             return
         if found_args["-i"]:  # soucis avec -i -> donner erreur si pas d'ip après
             tabIp = scanARP(ip)
+            scanIP(tabIp)
         # for i in range(1, len(sys.argv)):
         #     if valableIp(sys.argv[i]):
         #         tabIp = scanARP(sys.argv[i])
@@ -254,7 +255,7 @@ def flag(param):
     for i in range(1, len(param)):
         if helpMe(param[i]):
             found_args["-h"] = True
-            return found_args, ip, port
+            return found_args, ip, port, verifRange
         elif wantIp(param[i]):
             if len(param) > 2:
                 if valableIp(param[i+1]):
