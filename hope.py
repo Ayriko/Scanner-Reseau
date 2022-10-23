@@ -36,7 +36,7 @@ def main():
     else:
         found_args, ip, port, verifRange = flag(sys.argv)
         if found_args["-h"]:
-            print("oe de l'aide")
+            print("-h, --help\n                 show command help\n-i [ip]\n                 choose a ip for scanning\n-p [port] [port,port...] [port-port]\n                 choose an ip or multiple port to scan")
             return
         if found_args["-i"]:  # soucis avec -i -> donner erreur si pas d'ip après
             tabIp = scanARP(ip)
@@ -48,8 +48,6 @@ def main():
                     scanPortRange(tabIp, port)
                 else:
                     scanPort(tabIp, port)
-            else:
-                print("eh beh")
 
 
 def valableIp(testIp):
@@ -68,7 +66,7 @@ def scanARP(ipTest):
     testARP = srp(Ether(dst="ff:ff:ff:ff:ff:ff") /
                   ARP(pdst=ipTest), timeout=2)[0]
     with open("rapport.txt", "a") as file:
-        file.write("Nouvelle entrée dans le rapport" + "\n")
+        file.write("\nNouvelle entrée dans le rapport\n")
     for i in range(0, len(testARP)):
         count = count + 1
         tabIp.append(testARP[i][1].psrc)
@@ -266,14 +264,17 @@ def flag(param):
                 print("Merci de renseigner une Ip après le -i")
                 exit()
         elif wantPort(param[i]):
+            port = [param[i+1]]
             for char in param[i+1]:
-                if char == ",":
-                    split = ","
-                elif char == "-":
-                    split = "-"
-                    verifRange = True
-                # peut tester '-' ou ',' si mec veut tester une range de port
-            port = (str(param[i+1])).split(split)
+                if char.isnumeric() == False:
+                    if char == ",":
+                        split = ","
+                    elif char == "-":
+                        split = "-"
+                        verifRange = True
+                        # peut tester '-' ou ',' si mec veut tester une range de port
+                    port = (str(param[i+1])).split(split)
+                    break
             for x in port:
                 if validPort(x):
                     found_args["-p"] = True
