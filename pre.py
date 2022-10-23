@@ -14,24 +14,19 @@ def main():
     }
     # idée de rajouter un -y ou -n pour dire qu'on accepte ou non tout les tests suivants (genre ping)
     if sys.argv[1:] == []:
-        ipChoose = input("Rentrez l'adresse IP à tester avec son masque (ex: xxx.xxx.xxx.xxx/xx)\n")
+        ipChoose = input(
+            "Rentrez l'adresse IP à tester avec son masque (ex: xxx.xxx.xxx.xxx/xx)\n")
         if valableIp(ipChoose):
             tabIp = scanARP(ipChoose)
         else:
             main()
-        inputUser = input("Voulez vous faire un scan plus en profonder ? [Y/N] ").lower()
+        inputUser = input(
+            "Voulez vous ping les differents IP ? [Y/N] ").lower()
+        # remplacer par "Analyser les ips plus en profondeur ou un truc du genre ?"
         if inputUser == "y" or inputUser == "yes":
-            tabPort = ["20", "22", "53", "80", "443"]
             scanIP(tabIp)
-            scanPort(tabIp, tabPort)
-        else:
-            return
 
-        # # remplacer par "Analyser les ips plus en profondeur ou un truc du genre ?"
-        # if inputUser == "y" or inputUser == "yes":
-        #     scanIP(tabIp)
-
-        #     # rajouter l'interaction port
+            # rajouter l'interaction port
 
     else:
         found_args, ip, port, verifRange = flag(sys.argv)
@@ -100,7 +95,7 @@ def scanIP(tabIp):  # rajouter les test os ici ?
     print("Envoi de pings aux différentes IPs terminé, résultat entré dans le rapport")
     with open("rapport.txt", "a") as file:
         file.write(
-            "Ces IPs appartiennent potentiellement à un linux ou a un macOs : " + str(linux) + '\n')
+            "Ces IPs appartiennent surement à un linux ou a un macOs : " + str(linux) + '\n')
         file.write(
             "Ces IPs appartiennent potentiellement à un windows (ICMP bloqués) : " + str(win) + '\n')
         file.write(
@@ -262,27 +257,33 @@ def flag(param):
                 if valableIp(param[i+1]):
                     found_args["-i"] = True
                     ip = param[i+1]
+                    if wantPort(param[i+2]):
+                        for char in param[i+3]:
+                            if char == ",":
+                                split = ","
+                            elif char == "-":
+                                split = "-"
+                                verifRange = True
+                        # peut tester '-' ou ',' si mec veut tester une range de port
+                        port = (str(param[i+3])).split(split)
+                        for x in port:
+                            if validPort(x):
+                                found_args["-p"] = True
+                            else:
+                                found_args["-p"] = False
+                        if found_args["-p"] == False:
+                            exit()
+                        return found_args, ip, port, verifRange
+                    else:
+                        return found_args, ip, port, verifRange
+                else:
+                    exit()
             else:
                 print("Merci de renseigner une Ip après le -i")
                 exit()
-        elif wantPort(param[i]):
-            for char in param[i+1]:
-                if char == ",":
-                    split = ","
-                elif char == "-":
-                    split = "-"
-                    verifRange = True
-                # peut tester '-' ou ',' si mec veut tester une range de port
-            port = (str(param[i+1])).split(split)
-            for x in port:
-                if validPort(x):
-                    found_args["-p"] = True
-                else:
-                    exit()
         elif wantPort(param[i]) and found_args["-i"] == False:
             print("Il faut préciser une ip avec -i avant pour utiliser -p")
             exit()
-    return found_args, ip, port, verifRange
 
 
 main()
