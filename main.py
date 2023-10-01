@@ -9,9 +9,8 @@ def main():
     ip = ""
     port = []
     verifRange = False
-    found_args = {
+    found_args = {}
 
-    }
     if sys.argv[1:] == []:
         ipChoose = input("Rentrez l'adresse IP à tester avec son masque (ex: xxx.xxx.xxx.xxx/xx)\n")
         if valableIp(ipChoose):
